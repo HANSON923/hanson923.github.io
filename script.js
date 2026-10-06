@@ -3,6 +3,13 @@ function setLanguage(language) {
   document.documentElement.lang = selected === 'zh' ? 'zh-CN' : 'en';
   document.querySelectorAll('[data-zh]').forEach(element => {
     element.textContent = element.dataset[selected];
+    if (selected === 'zh' && element.id === 'title' && element.textContent.includes('&')) {
+      const parts = element.textContent.split('&');
+      const ampersand = document.createElement('span');
+      ampersand.className = 'title-ampersand';
+      ampersand.textContent = '&';
+      element.replaceChildren(parts[0], ampersand, parts.slice(1).join('&'));
+    }
   });
   document.querySelectorAll('[data-lang]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.lang === selected));
@@ -22,14 +29,33 @@ function setLanguage(language) {
       link.href = target.href;
     }
   });
-  try { localStorage.setItem('portfolio-language', selected); } catch {}
 }
 document.querySelectorAll('[data-lang]').forEach(button => {
   button.addEventListener('click', () => setLanguage(button.dataset.lang));
 });
-// Default to English on the first visit; retain the visitor's choice thereafter.
-let language = new URLSearchParams(window.location.search).get('lang');
-if (language !== 'zh' && language !== 'en') {
-  try { language = localStorage.getItem('portfolio-language'); } catch {}
-}
+// Direct visits default to English; internal links carry the chosen language.
+const language = new URLSearchParams(window.location.search).get('lang');
 setLanguage(language);
+
+const discordCopy = document.getElementById('discord-copy');
+let copyToastTimer;
+let copyToastClearTimer;
+discordCopy?.addEventListener('click', async () => {
+  const status = document.getElementById('discord-status');
+  clearTimeout(copyToastTimer);
+  clearTimeout(copyToastClearTimer);
+  try {
+    await navigator.clipboard.writeText('hanson923.');
+    status.textContent = 'Username copied';
+  } catch {
+    status.textContent = 'Could not copy username. Please try again.';
+  }
+  status.classList.add('is-visible');
+  copyToastTimer = setTimeout(() => {
+    status.classList.remove('is-visible');
+    const fadeDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180;
+    copyToastClearTimer = setTimeout(() => {
+      status.textContent = '';
+    }, fadeDuration);
+  }, 1000);
+});

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Yuhan Chen — Games & Music / 游戏与音乐作品集">
   <title>Yuhan Chen — Portfolio</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -23,7 +24,19 @@
     <section class="intro" aria-labelledby="title">
       <p class="eyebrow" data-zh="个人作品集 / PORTFOLIO" data-en="PERSONAL PORTFOLIO">PERSONAL PORTFOLIO</p>
       <h1 id="title" data-zh="玩 &amp; 乐" data-en="Play &amp; Sound">Play &amp; Sound</h1>
-      <p data-zh="我是陈宇涵。这里记录我的作品。" data-en="I'm Yuhan Chen. This is a space for my work.">I'm Yuhan Chen. This is a space for my work.</p>
+      <p data-zh="我是陈宇涵，目前在密歇根大学攻读电气与计算机工程硕士，拥有通信工程背景。我对游戏和音乐充满兴趣。这里记录我的作品。" data-en="I’m Yuhan Chen, a master’s student in Electrical and Computer Engineering at the University of Michigan, with a background in communication engineering. I’m interested in games and music. This is a space for my work.">I’m Yuhan Chen, a master’s student in Electrical and Computer Engineering at the University of Michigan, with a background in communication engineering. I’m interested in games and music. This is a space for my work.</p>
+      <div class="social-links">
+        <a class="social-link" href="https://www.instagram.com/yyyyyyhchen/" target="_blank" rel="noopener noreferrer" aria-label="Instagram — yyyyyyhchen" title="Instagram — @yyyyyyhchen">
+          <img class="brand-icon" src="images/brands/instagram.svg" width="24" height="24" alt="">
+          <span>Instagram</span>
+        </a>
+        <button class="social-link" id="discord-copy" type="button" title="Copy Discord username" aria-label="Copy Discord username">
+          <img class="brand-icon" src="images/brands/discord.svg" width="24" height="18" alt="">
+          <span>Discord</span>
+        </button>
+      </div>
+
+      <div id="discord-status" class="copy-toast" role="status" aria-live="polite"></div>
     </section>
   </main>
   <script src="script.js"></script>
