@@ -66,6 +66,9 @@ body:is([data-page="games"], [data-page="music"]) .intro p:last-of-type { margin
 
 .project-layout .music-cover { width: 100%; max-width: 450px; aspect-ratio: 1; padding: 24px; }
 .project-layout .music-cover strong { font-size: clamp(32px, 5vw, 64px); }
+.project-layout .scratch-cover { width: 100%; max-width: 450px; aspect-ratio: 1; padding: 24px; }
+.project-layout .scratch-cover strong { font-size: clamp(28px, 4vw, 52px); }
+@media (max-width: 760px) { .project-layout .scratch-cover { justify-self: center; } }
 @media (max-width: 760px) { .project-layout .music-cover { justify-self: center; } }
 
 .social-links { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; }
