@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toy Adventure — Yuhan Chen</title>
+  <meta name="description" content="Toy Adventure, a two-player co-op game set in a playroom. Theming and UI by Yuhan Chen.">
+  <meta property="og:image" content="video/toy-play.jpg">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Fredoka:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ============ Toy Adventure stage: the game's own menu board, on the playroom floor ============ */
+    :root {
+      --floor: #7ef59b;      /* the playroom floor */
+      --floor-deep: #58d67c;
+      --wood: #af7444;       /* menu frame */
+      --wood-deep: #8a5830;
+      --board: #fdf1d3;      /* menu paper */
+      --title: #f5a30a;      /* the game's title orange */
+      --key: #dcdcea;        /* menu button face */
+      --key-edge: #8d8da3;
+      --toy-ink: #2f2c2a;
+      --toy-red: #d9232b;
+      --round: "Fredoka", "PingFang SC", "Microsoft YaHei", var(--font);
+    }
+    body { background: var(--floor); color: var(--toy-ink); }
+    .site-header { position: absolute; mix-blend-mode: normal; color: var(--toy-ink); }
+    .lang { border-left-color: rgba(47,44,42,.35); }
+    .site-footer { border-color: rgba(47,44,42,.2); color: #2f5a3c; }
+    .site-footer a:hover { color: var(--toy-ink); }
+    h1, h2, h3, .key, .next strong { font-family: var(--round); }
+
+    /* chunky menu button, as in the game */
+    .key {
+      display: inline-block; min-width: 220px; padding: 12px 28px; text-align: center;
+      font-size: clamp(20px, 2vw, 26px); font-weight: 600; color: var(--toy-ink);
+      background: var(--key); border: 3px solid #fff; border-radius: 8px;
+      box-shadow: 0 0 0 3px var(--key-edge), 0 7px 0 0 var(--key-edge);
+      cursor: pointer; transition: transform .1s, box-shadow .1s;
+    }
+    .key:hover { background: #ececf6; }
+    .key:active { transform: translateY(4px); box-shadow: 0 0 0 3px var(--key-edge), 0 3px 0 0 var(--key-edge); }
+    .key[aria-current="true"] { background: var(--title); border-color: #ffe2a3; box-shadow: 0 0 0 3px #b9770a, 0 7px 0 0 #b9770a; }
+
+    /* wooden frame shared by the menu board and the screen */
+    .frame {
+      background: var(--board);
+      border: clamp(6px, .8vw, 10px) solid var(--wood);
+      border-top-width: clamp(34px, 5vw, 64px); border-bottom-width: clamp(34px, 5vw, 64px);
+      box-shadow: inset 0 10px 0 -4px rgba(0,0,0,.08), 0 18px 0 -8px var(--floor-deep);
+      background-clip: padding-box;
+    }
+
+    /* ---------- Hero: the main menu ---------- */
+    .hero { padding: 96px var(--gutter) 0; }
+    .menu { text-align: center; padding: clamp(28px, 5vw, 64px) clamp(18px, 4vw, 56px) clamp(36px, 5vw, 64px); }
+    .menu h1 {
+      margin: 0 0 14px; color: var(--title);
+      font-size: clamp(52px, 11vw, 168px); line-height: .95; font-weight: 600; letter-spacing: -.01em;
+    }
+    .menu .lede { margin: 0 auto 30px; max-width: 34em; font-size: clamp(16px, 1.4vw, 20px); }
+    .menu-keys { display: grid; justify-content: center; gap: 20px; }
+    .stage-tag { display: inline-block; margin-bottom: 18px; padding: 4px 12px; border-radius: 99px; background: var(--toy-ink); color: var(--board); font-size: 14px; }
+
+    /* the floor in front of the board: bricks and the two players */
+    .floor { position: relative; height: clamp(104px, 10vw, 128px); margin: 0 var(--gutter); }
+    .brick {
+      position: absolute; bottom: 0; height: var(--h, 34px); width: var(--w, 96px); left: var(--x);
+      background: var(--c); border-radius: 4px;
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,.14), inset 0 3px 0 rgba(255,255,255,.25);
+    }
+    .brick::before { /* studs */
+      content: ""; position: absolute; left: 6px; right: 6px; bottom: 100%; height: 8px;
+      background: repeating-linear-gradient(90deg, var(--c) 0 18px, transparent 18px 28px);
+      border-radius: 3px 3px 0 0; filter: brightness(1.08);
+    }
+    .brick.up { bottom: 34px; }
+    .pal {
+      position: absolute; bottom: 0; left: var(--x); width: 46px; height: 88px; border-radius: 23px; padding: 0; border: 0; cursor: pointer;
+      background: linear-gradient(100deg, #f04a45, var(--toy-red) 45%, #a8141c);
+      box-shadow: 0 10px 0 -4px rgba(0,0,0,.0);
+    }
+    .pal::before, .pal::after { content: ""; position: absolute; top: 6px; width: 15px; height: 15px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8d8d92, #4e4e55); }
+    .pal::before { left: 5px; } .pal::after { right: 5px; }
+    .pal + .shadow, .shadow { position: absolute; bottom: -6px; left: calc(var(--x) - 8px); width: 62px; height: 12px; border-radius: 50%; background: rgba(0,0,0,.16); }
+    .pal.hop { animation: hop .55s cubic-bezier(.3,.7,.4,1); }
+    @keyframes hop { 0%, 100% { transform: none; } 40% { transform: translateY(-70px) scaleY(1.06); } 85% { transform: translateY(0) scaleY(.92); } }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .brick { animation: drop .7s cubic-bezier(.5,0,.75,.4) both; animation-delay: var(--d, 0s); }
+      .pal { animation: drop .7s cubic-bezier(.5,0,.75,.4) both; animation-delay: var(--d, 0s); }
+      .pal.hop { animation: hop .55s cubic-bezier(.3,.7,.4,1); }
+    }
+    @keyframes drop {
+      0% { transform: translateY(-110vh) rotate(var(--r, -8deg)); }
+      70% { transform: translateY(0) rotate(0); animation-timing-function: ease-out; }
+      82% { transform: translateY(-14px); animation-timing-function: ease-in; }
+      100% { transform: none; }
+    }
+
+    /* ---------- Sections ---------- */
+    section h2 { margin: 0 0 22px; font-size: clamp(30px, 4vw, 56px); font-weight: 600; line-height: 1.05; }
+    .watch { padding: clamp(56px, 9vh, 110px) var(--gutter); }
+    .watch-body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 64px); align-items: start; }
+    .screen { padding: 0; line-height: 0; }
+    .screen video { width: 100%; aspect-ratio: 1152 / 720; object-fit: cover; }
+    .chapters { list-style: none; margin: 0 0 28px; padding: 0; display: grid; gap: 18px; }
+    .chapters .key { width: 100%; min-width: 0; font-size: clamp(17px, 1.5vw, 21px); padding: 10px 16px; }
+    .watch p { margin: 0 0 14px; max-width: 34em; }
+
+    .mine { background: var(--board); padding: clamp(56px, 9vh, 110px) var(--gutter); border-block: clamp(10px, 1.4vw, 18px) solid var(--wood); }
+    .mine-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: clamp(28px, 5vw, 80px); align-items: start; }
+    .mine p { margin: 0 0 14px; max-width: 32em; }
+    .shots { display: grid; gap: 16px; }
+    .shots figure { margin: 0; }
+    .shots img { width: 100%; height: auto; border-radius: 6px; box-shadow: 0 0 0 3px var(--wood); }
+    .shots figcaption { margin-top: 10px; font-size: 14px; color: #6d5a45; }
+
+    .credits { padding: clamp(56px, 9vh, 110px) var(--gutter) 0; }
+    .team { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .team li { --c: #3d7fe0; position: relative; padding: 18px 16px 20px; border-radius: 6px; background: var(--c); color: #fff; font-family: var(--round); font-size: clamp(17px, 1.5vw, 21px); font-weight: 500; line-height: 1.25; box-shadow: inset 0 -8px 0 rgba(0,0,0,.14); }
+    .team li::before { content: ""; position: absolute; left: 10px; right: 10px; bottom: 100%; height: 9px; background: repeating-linear-gradient(90deg, var(--c) 0 22px, transparent 22px 34px); border-radius: 3px 3px 0 0; }
+    .team small { display: block; margin-top: 4px; font-family: var(--font); font-size: 13px; font-weight: 400; opacity: .9; }
+    .course { margin: 22px 0 0; font-size: 15px; color: #2f5a3c; }
+
+    .exit { padding: clamp(56px, 9vh, 110px) var(--gutter) clamp(72px, 12vh, 120px); }
+    .exit p { margin: 0 0 24px; max-width: 34em; }
+    .downloads { display: flex; flex-wrap: wrap; gap: 22px; }
+    .next { display: block; margin-top: clamp(56px, 9vh, 96px); border-top: 2px solid rgba(47,44,42,.2); padding-top: 24px; }
+    .next small { display: block; font-size: 14px; color: #2f5a3c; }
+    .next strong { font-size: clamp(36px, 6vw, 84px); font-weight: 600; }
+    .next:hover strong { color: #fff; }
+
+    @media (max-width: 900px) {
+      .watch-body, .mine-body { grid-template-columns: 1fr; }
+      .team { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 24px; }
+      .floor .hide-s { display: none; }
+    }
+    @media (max-width: 520px) { .key { min-width: 0; width: 100%; } .shots { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-title-en="Toy Adventure — Yuhan Chen" data-title-zh="Toy Adventure — 陈宇涵">
+  <header class="site-header">
+    <a class="name" href="index.html" data-en="Yuhan Chen" data-zh="陈宇涵">Yuhan Chen</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html#work" data-en="Work" data-zh="作品">Work</a>
+      <a href="resume.pdf" data-en="Résumé" data-zh="简历">Résumé</a>
+      <div class="lang" role="group" aria-label="Language / 语言">
+        <button type="button" data-lang="zh" lang="zh-CN" aria-pressed="false">中文</button>
+        <button type="button" data-lang="en" lang="en" aria-pressed="true">EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="title">
+      <div class="frame menu">
+        <span class="stage-tag" data-en="Milestone build, still in development" data-zh="Milestone 版本，仍在开发中">Milestone build, still in development</span>
+        <h1 id="title">Toy Adventure</h1>
+        <p class="lede" data-en="A two-player co-op game set in a playroom. You and a friend are two small toys among giant ones, picking up, throwing and dropping blocks as you explore."
+           data-zh="一款发生在玩具房里的双人合作游戏。你和朋友扮演两个小玩具，在一堆巨大的玩具之间探索，捡起、投掷、放下积木。">A two-player co-op game set in a playroom. You and a friend are two small toys among giant ones, picking up, throwing and dropping blocks as you explore.</p>
+        <nav class="menu-keys" aria-label="On this page">
+          <a class="key" href="#watch" data-en="Watch" data-zh="看演示">Watch</a>
+          <a class="key" href="#play" data-en="Play" data-zh="下载试玩">Play</a>
+          <a class="key" href="#credits" data-en="Credits" data-zh="制作团队">Credits</a>
+        </nav>
+      </div>
+      <div class="floor" aria-hidden="true">
+        <span class="brick" style="--c:#d9232b;--x:3%;--w:112px;--d:.25s;--r:-10deg"></span>
+        <span class="brick up" style="--c:#8a3fd1;--x:calc(3% + 28px);--w:56px;--d:.6s;--r:12deg"></span>
+        <span class="brick hide-s" style="--c:#f2c230;--x:20%;--w:84px;--d:.4s;--r:6deg"></span>
+        <span class="shadow" style="--x:36%"></span>
+        <button class="pal" type="button" tabindex="-1" style="--x:36%;--d:.85s;--r:0deg"></button>
+        <span class="shadow" style="--x:calc(36% + 70px)"></span>
+        <button class="pal" type="button" tabindex="-1" style="--x:calc(36% + 70px);--d:1s;--r:0deg"></button>
+        <span class="brick hide-s" style="--c:#3d7fe0;--x:58%;--w:140px;--d:.5s;--r:-6deg"></span>
+        <span class="brick up hide-s" style="--c:#f08a2c;--x:calc(58% + 42px);--w:56px;--d:.9s;--r:14deg"></span>
+        <span class="brick" style="--c:#2fae5b;--x:82%;--w:84px;--d:.35s;--r:9deg"></span>
+      </div>
+    </section>
+
+    <section class="watch" id="watch" aria-labelledby="watch-h">
+      <h2 id="watch-h" data-en="Two players, one playroom" data-zh="两个玩家，一间玩具房">Two players, one playroom</h2>
+      <div class="watch-body">
+        <div class="frame screen">
+          <video id="play-video" src="video/toy-play.mp4" poster="video/toy-play.jpg" muted loop playsinline preload="metadata" aria-label="Split-screen gameplay of Toy Adventure"></video>
+        </div>
+        <div>
+          <ol class="chapters" aria-label="Jump to a part of the clip">
+            <li><button class="key" type="button" data-t="0" data-en="The playroom" data-zh="玩具房">The playroom</button></li>
+            <li><button class="key" type="button" data-t="14" data-en="Pick up and throw" data-zh="捡起和投掷">Pick up and throw</button></li>
+            <li><button class="key" type="button" data-t="28" data-en="The teddy bear" data-zh="泰迪熊">The teddy bear</button></li>
+            <li><button class="key" type="button" data-t="42" data-en="The toy piano" data-zh="玩具钢琴">The toy piano</button></li>
+          </ol>
+          <p data-en="The screen is split down the middle, one half per player. Each player can pick up a block, then throw it or drop it."
+             data-zh="画面从中间一分为二，每个玩家各占一半。每个玩家都可以捡起积木，再把它扔出去或放下。">The screen is split down the middle, one half per player. Each player can pick up a block, then throw it or drop it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mine" aria-labelledby="mine-h">
+      <h2 id="mine-h" data-en="My part: theming and UI" data-zh="我负责的部分：主题风格与 UI">My part: theming and UI</h2>
+      <div class="mine-body">
+        <div>
+          <p data-en="On a team of four, I was responsible for the game’s theming and its UI."
+             data-zh="在四人团队里，我负责游戏的主题风格（theming）和 UI。">On a team of four, I was responsible for the game’s theming and its UI.</p>
+          <p data-en="That includes the main menu. This page borrows the same look: the wooden frame, the cream board and the menu buttons."
+             data-zh="其中包括主菜单。这个页面也借用了同一套视觉：木质边框、米色面板和菜单按钮。">That includes the main menu. This page borrows the same look: the wooden frame, the cream board and the menu buttons.</p>
+        </div>
+        <div class="shots">
+          <figure>
+            <img src="images/toy-menu.png" width="1152" height="720" loading="lazy" alt="The Toy Adventure main menu: an orange title on a cream board in a wooden frame, with Play, Settings and Credits buttons">
+            <figcaption data-en="Main menu" data-zh="主菜单">Main menu</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="credits" id="credits" aria-labelledby="credits-h">
+      <h2 id="credits-h" data-en="Credits" data-zh="制作团队">Credits</h2>
+      <ul class="team">
+        <li style="--c:#d9232b">Biel Salvador Tapley-Coll</li>
+        <li style="--c:#3d7fe0">Hektor Buqaj</li>
+        <li style="--c:#8a3fd1">Naythan Christopher Gough</li>
+        <li style="--c:#e07f1a">Yuhan Chen<small data-en="Theming and UI" data-zh="主题风格与 UI">Theming and UI</small></li>
+      </ul>
+      <p class="course" data-en="Built with Unity and C# for EECS 494 (Project 3) at the University of Michigan." data-zh="使用 Unity 和 C# 制作，密歇根大学 EECS 494 课程的第三个项目（P3）。">Built with Unity and C# for EECS 494 (Project 3) at the University of Michigan.</p>
+    </section>
+
+    <section class="exit" id="play" aria-labelledby="play-h">
+      <h2 id="play-h" data-en="Play it" data-zh="下载试玩">Play it</h2>
+      <p data-en="The milestone build is available for Windows and macOS. You’ll need two players." data-zh="Milestone 版本提供 Windows 和 macOS 下载。需要两名玩家一起玩。">The milestone build is available for Windows and macOS. You’ll need two players.</p>
+      <div class="downloads">
+        <a class="key" href="https://github.com/HANSON923/P3-Toy-Adventure/releases/download/milestone/p3.milestone.windows.zip" data-en="Download for Windows" data-zh="下载 Windows 版">Download for Windows</a>
+        <a class="key" href="https://github.com/HANSON923/P3-Toy-Adventure/releases/download/milestone/p3.miletone.macos.zip" data-en="Download for macOS" data-zh="下载 macOS 版">Download for macOS</a>
+      </div>
+      <a class="next" href="scratch.html">
+        <small data-en="Next project" data-zh="下一个作品">Next project</small>
+        <strong>Scratch</strong>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>© 2026 Yuhan Chen</span>
+    <a href="index.html" data-en="All work" data-zh="全部作品">All work</a>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // The two players hop when poked.
+    document.querySelectorAll('.pal').forEach(pal => {
+      pal.addEventListener('click', () => { pal.classList.remove('hop'); void pal.offsetWidth; pal.classList.add('hop'); });
+      pal.addEventListener('animationend', e => { if (e.animationName === 'hop') pal.classList.remove('hop'); });
+    });
+
+    // Gameplay clip: plays muted while on screen; menu buttons jump between parts.
+    const video = document.getElementById('play-video');
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !reduce) video.play().catch(() => {});
+      else if (!e.isIntersecting) video.pause();
+    }, { threshold: 0.35 }).observe(video);
+    const chapters = [...document.querySelectorAll('.chapters .key')];
+    chapters.forEach(b => b.addEventListener('click', () => { video.currentTime = Number(b.dataset.t); video.play().catch(() => {}); }));
+    video.addEventListener('timeupdate', () => {
+      const current = chapters.filter(c => Number(c.dataset.t) <= video.currentTime + 0.05).pop();
+      chapters.forEach(c => c.setAttribute('aria-current', String(c === current)));
+    });
+  </script>
+</body>
+</html>
